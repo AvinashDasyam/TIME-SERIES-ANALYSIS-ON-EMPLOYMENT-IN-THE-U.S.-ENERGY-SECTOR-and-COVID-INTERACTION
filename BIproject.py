@@ -200,7 +200,7 @@ plt.show()
 
 final.dropna(subset = ['Monthly_Covid_cases'],inplace=True)
 
-fig = make_subplots(rows=1, cols=2, subplot_titles =['Covid vs Employement','Covid vs USRigCounts',
+fig = make_subplots(rows=2, cols=2, subplot_titles =['Covid vs Employement','Covid vs USRigCounts',
                                                      'Covid vs RetailGasolinePrice','Covid vs CrudeOilPrices'])
 fig.add_trace(go.Scatter(x=final['Monthly_Covid_cases'], y=final['EmployedInThousands'], name='EmploymentInThousands'),row=1, col=1)
 fig.add_trace(go.Scatter(x=final['Monthly_Covid_cases'], y=final['USRigCounts'], name='USRigCounts'),row=1, col=2)
@@ -210,3 +210,4 @@ plotly.offline.plot(fig)
 
 fig.update_layout(title_text='Monthly Covidcases in contrast to all Datasets')
 
+print('Drafted')
