@@ -2,14 +2,16 @@
 import pandas as pd
 import numpy as np
 import datetime
-import scipy.stats as scipystat
+from sklearn.linear_model import LinearRegression
 import seaborn as sn
 import matplotlib.pyplot as plt
 import plotly
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import plotly.io as pio
+from django.shortcuts import render
 
-path =  'C:/Users/14699/Downloads/BI/BIproject/'
+path =  'C:/Users/14699/TSA_of_Covid_impacting_others/'
 file1 = 'Employed.csv'
 file2 = 'WTI Cruide Oil Price.csv'
 file3 = 'Worldwide Rig Count Aug 2021.csv'
@@ -62,10 +64,7 @@ for i,v in rigc['Month'].iteritems():
     rigc.at[i,'Month_ID'] =  int(month_converter(v))
     
 rigc['year_month'] = rigc['Year'].astype(str) + rigc['Month_ID'].astype(str).str.zfill(2)
-#rigc['year_month']= pd.to_numeric(rigc['year_month'])
-#rigc.set_index('year_month',inplace=True)
-#rigc[['year_month','Year','Month','U.S']].sort_values(by=['year_month'], inplace= True)
-#rigc=rigc.rename(columns={'U.S': 'U.S_Rigs'})
+
 rigDF = rigc[['year_month','Month','Year','U.S']]
 
 
@@ -194,20 +193,104 @@ plt.show()
 # Pearsons correlation of monthly_positive_cases vs Employement in oil industry: -0.632
 # Pearsons correlation of monthly_positive_cases vs Number of U.S Rigs: -0.596
 
-##Monthly covid cases in contrast to all datasets
-#dropping null values of covid cases starrting from 2012 to 2019
-#final['Monthly_Covid_cases'].dropna(axis=0,how=any,inplace=True)
 
-final.dropna(subset = ['Monthly_Covid_cases'],inplace=True)
+final1 = final
+#dropping null values of covid cases starting from 2012 to 2019
+final1.dropna(subset = ['Monthly_Covid_cases'],inplace=True)
 
+##Monthly covid cases in contrast to all datasets individually
 fig = make_subplots(rows=2, cols=2, subplot_titles =['Covid vs Employement','Covid vs USRigCounts',
-                                                     'Covid vs RetailGasolinePrice','Covid vs CrudeOilPrices'])
-fig.add_trace(go.Scatter(x=final['Monthly_Covid_cases'], y=final['EmployedInThousands'], name='EmploymentInThousands'),row=1, col=1)
-fig.add_trace(go.Scatter(x=final['Monthly_Covid_cases'], y=final['USRigCounts'], name='USRigCounts'),row=1, col=2)
-fig.add_trace(go.Scatter(x=final['Monthly_Covid_cases'], y=final['RetailGasolinePrice'], name='RetailGasolinePrice'),row=2, col=1)
-fig.add_trace(go.Scatter(x=final['Monthly_Covid_cases'], y=final['CrudeOilPrice'], name='CrudeOilPrice'),row=2, col=2)
-plotly.offline.plot(fig)
+                                                      'Covid vs RetailGasolinePrice','Covid vs CrudeOilPrices'])
+fig.add_trace(go.Scatter(x=final1['Monthly_Covid_cases'], y=final1['EmployedInThousands'], name='EmploymentInThousands'),row=1, col=1)
+fig.add_trace(go.Scatter(x=final1['Monthly_Covid_cases'], y=final1['USRigCounts'], name='USRigCounts'),row=1, col=2)
+fig.add_trace(go.Scatter(x=final1['Monthly_Covid_cases'], y=final1['RetailGasolinePrice'], name='RetailGasolinePrice'),row=2, col=1)
+fig.add_trace(go.Scatter(x=final1['Monthly_Covid_cases'], y=final1['CrudeOilPrice'], name='CrudeOilPrice'),row=2, col=2)
 
 fig.update_layout(title_text='Monthly Covidcases in contrast to all Datasets')
+#fig.show()
+#plotly.offline.plot(fig)
 
-print('Drafted')
+##YearandMonth data in contrast to all datasets and multiple Axes
+
+fig1 = go.Figure()
+
+
+#final1['YearMonthID'] = pd.to_numeric(final1['YearMonthID'])
+
+fig1.add_trace(go.Scatter(x=final1['YearMonthID'],y=final1['Monthly_Covid_cases'],name="Monthly_Covid_cases"))
+fig1.add_trace(go.Scatter(x=final1['YearMonthID'],y=final1['EmployedInThousands'],name="EmployedInThousands",yaxis="y2"))
+fig1.add_trace(go.Scatter(x=final1['YearMonthID'],y=final1['USRigCounts'],name="USRigCounts",yaxis="y3"))
+fig1.add_trace(go.Scatter(x=final1['YearMonthID'],y=final1['RetailGasolinePrice'],name="RetailGasolinePrice",yaxis="y4"))
+
+# Create axis objects
+fig1.update_layout(xaxis=dict(domain=[0.3, 0.7]
+    ),
+    yaxis=dict(
+        title="Monthly_Covid_cases",
+        titlefont=dict(
+            color="#1f77b4"
+        ),
+        tickfont=dict(
+            color="#1f77b4"
+        )
+    ),
+    yaxis2=dict(
+        title="EmployedInThousands",
+        titlefont=dict(
+            color="#ff7f0e"
+        ),
+        tickfont=dict(
+            color="#ff7f0e"
+        ),
+        anchor="free",
+        overlaying="y",
+        side="left",
+        position=0.15
+    ),
+    yaxis3=dict(
+        title="USRigCounts",
+        titlefont=dict(
+            color="#d62728"
+        ),
+        tickfont=dict(
+            color="#d62728"
+        ),
+        anchor="x",
+        overlaying="y",
+        side="right"
+    ),
+    yaxis4=dict(
+        title="RetailGasolinePrice",
+        titlefont=dict(
+            color="#9467bd"
+        ),
+        tickfont=dict(
+            color="#9467bd"
+        ),
+        anchor="free",
+        overlaying="y",
+        side="right",
+        position=0.85
+    )
+   
+)
+
+# Update layout properties
+fig1.update_layout(title_text='Time Series Correlation')
+#fig1.show()
+#plotly.offline.plot(fig1)
+
+#regressor = LinearRegression()
+
+
+#print('Drafted')
+# plotly.offline.plot(fig, filename='name.html')
+# plotly.offline.plot(fig1, filename='name.html')
+
+with open('p_graph.html', 'a') as f:
+    f.write(fig.to_html(full_html=False, include_plotlyjs='cdn'))
+    f.write(fig1.to_html(full_html=False, include_plotlyjs='cdn'))
+    #f.write(fig3.to_html(full_html=False, include_plotlyjs='cdn'))
+
+
+plt_div = plotly.offline.plot(fig, output_type='div', include_plotlyjs=False)
