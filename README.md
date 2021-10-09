@@ -1,4 +1,4 @@
-# TSA_of_Covid_impacting_others
+#TIME-SERIES-ANALYSIS-ON-EMPLOYMENT-IN-THE-U.S.-ENERGY-SECTOR-and-COVID-INTERACTION
 Steps involved in running the code.
 
 1. Download/Clone the repository.
